@@ -15,10 +15,10 @@ function possibleMoves(pos) {
     );
 }
 
-class Node {
-    constructor(father, sonList){
-        this.father = father
-        this.sonList = sonList
+class Links {
+    constructor(pos, father){
+        this.pos = pos
+        this.father =father
     }
 }
 
@@ -28,29 +28,52 @@ function have(arr, pair) {
     });
 }
 
-function isEqual(arr1, arr2){
-    if(arr1[0] == arr2[0] && arr1[1] == arr2[1]){
-        return true
+function isEqual(arr1, arr2) {
+    if (arr1[0] == arr2[0] && arr1[1] == arr2[1]) {
+        return true;
     }
-    return false
+    return false;
 }
 
-function knightMoves(pos, target, path = [], ready = []) {
+
+function getPath(pos, target, path = [], visited = [], ancessor = null, nodeFather = null) {
     const moves = possibleMoves(pos);
-    ready.push(pos);
-    if (isEqual(target,pos)) {
-        console.log("i fucking found it")
-        return ready;
+    let node 
+    if( ancessor != null){
+        if( isEqual(nodeFather, ancessor.pos)){
+            node = new Links(pos, ancessor);
+        }else{
+            node = new Links(pos, ancessor.father)
+        }
+    }else{
+        node = new Links(pos, ancessor)
+    }
+    visited.push(node);
+    
+    if (isEqual(target, pos)) {
+        return node;
     } else {
         moves.map((i) => {
-            if (!have(ready, i)) path.push(i);
+            if (!have(visited, i)) path.push(new Links(i, node));
         });
-        
+
         if (path.length !== 0) {
-            return knightMoves(path.shift(), target, path, ready);
+            const next = path.shift()
+            return getPath(next.pos, target, path, visited, next, next.father);
         }
     }
 }
 
+function knightMoves(pos, target){
+    const path = []
+    let parcourer = getPath(pos, target)
+    while(parcourer != null){
+        path.push(parcourer.pos);
+        parcourer = parcourer.father
+    }
+    return path
+}
 
-console.log(knightMoves([0, 0], [0, 4]));
+const result = getPath([0, 0], [7, 7]); 
+
+console.log("you made it here is theb path ", knightMoves([0, 0], [7, 7]))
